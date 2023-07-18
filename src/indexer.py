@@ -1,4 +1,4 @@
-from langchain.document_loaders import BSHTMLLoader
+from langchain.document_loaders import PyPDFLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import ElasticVectorSearch
@@ -7,17 +7,13 @@ from config import Paths, openai_api_key
 
 
 def main():
-    loader = BSHTMLLoader(str(Paths.book))
-    data = loader.load()
 
-    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-        chunk_size=1000, chunk_overlap=0
-    )
-    documents = text_splitter.split_documents(data)
+    loader = PyPDFLoader(str(Paths.manual))
+    documents_manual = loader.load_and_split()
 
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     db = ElasticVectorSearch.from_documents(
-        documents,
+        documents_manual,
         embeddings,
         elasticsearch_url="http://localhost:9200",
         index_name="elastic-index",
